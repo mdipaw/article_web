@@ -4,7 +4,6 @@ import (
 	"article_web/article"
 	"article_web/model"
 	"article_web/redis"
-	"article_web/rest"
 	"article_web/server"
 	"article_web/server/public"
 	"article_web/service"
@@ -13,6 +12,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -111,17 +111,17 @@ func TestGetArticle(t *testing.T) {
 		r, _ := http.NewRequest("GET", "/api/article", nil)
 		f.server.ServeHTTP(w, r)
 
+		log.Println(w.Body)
 		assert.Equal(t, 200, w.Code)
 
-		var response rest.MappedResponse[[]public.ArticleResponse]
+		var response []public.ArticleResponse
 		json.Unmarshal(w.Body.Bytes(), &response)
+		log.Println(response)
 
-		assert.Equal(t, 1, len(response.Data))
-		assert.Equal(t, 1, response.Page)
-		assert.Equal(t, data.Author, response.Data[0].Author)
-		assert.Equal(t, data.Title, response.Data[0].Title)
-		assert.Equal(t, data.Body, response.Data[0].Body)
-		isEqual := response.Data[0].Created.Equal(data.Created)
+		assert.Equal(t, data.Author, response[0].Author)
+		assert.Equal(t, data.Title, response[0].Title)
+		assert.Equal(t, data.Body, response[0].Body)
+		isEqual := response[0].Created.Equal(data.Created)
 		assert.True(t, isEqual)
 	})
 }

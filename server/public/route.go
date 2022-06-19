@@ -5,6 +5,7 @@ import (
 	"article_web/model"
 	"article_web/rest"
 	"article_web/service"
+	"log"
 	"net/http"
 	"time"
 
@@ -19,9 +20,9 @@ func NewPublicHandler(di *service.Container) *PublicHandler {
 	return &PublicHandler{di}
 }
 
-func (p *PublicHandler) RegisterRoutes(engine *gin.RouterGroup) *gin.RouterGroup {
+func (p *PublicHandler) RegisterRoutes(engine *gin.RouterGroup, cacheMiddleWare rest.CacheMiddlewareFunc) *gin.RouterGroup {
 	engine.POST("/article", p.PostArticle())
-	engine.GET("/article", p.GetArticle())
+	engine.GET("/article", cacheMiddleWare(p.di.RedisClient), p.GetArticle())
 	return engine
 }
 
@@ -62,34 +63,28 @@ func (p *PublicHandler) GetArticle() gin.HandlerFunc {
 		paramQuery := c.Query("query")
 		paramAuthor := c.Query("author")
 
-		query := p.di.ArticleReader.GetQuery(model.ArticleFilter{
+		article, err := p.di.ArticleReader.GetQuery(model.ArticleFilter{
 			Query:  paramQuery,
 			Author: paramAuthor,
-		}).Query
-
-		paginator := rest.PaginatorFromContext[[]model.Article, []ArticleResponse](c)
-		paginatedResponse := paginator.PaginateQuery(query).
-			Map(func(x []model.Article) []ArticleResponse {
-				result := []ArticleResponse{}
-				for _, X := range x {
-					result = append(result, ArticleResponse{
-						ID:      X.ID,
-						Author:  X.Author,
-						Title:   X.Title,
-						Body:    X.Body,
-						Created: X.Created,
-					})
-				}
-				return result
-			})
-
-		if paginatedResponse.Error != nil {
-			c.JSON(http.StatusBadRequest,
-				gin.H{"error": paginatedResponse.Error.Error()})
+		}).Find()
+		if err != nil {
 			return
 		}
-		// TODO:implement caching
-		c.JSON(http.StatusOK, paginatedResponse)
+
+		result := []ArticleResponse{}
+		for _, x := range article {
+			result = append(result, ArticleResponse{
+				ID:      x.ID,
+				Author:  x.Author,
+				Title:   x.Title,
+				Body:    x.Body,
+				Created: x.Created,
+			})
+		}
+		log.Println(result)
+
+		p.di.RedisClient.Set("getAllArticle", result)
+		c.JSON(http.StatusOK, result)
 		return
 	}
 }

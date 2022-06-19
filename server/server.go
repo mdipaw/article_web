@@ -1,6 +1,7 @@
 package server
 
 import (
+	"article_web/rest"
 	"article_web/server/public"
 	"article_web/service"
 	"article_web/worker"
@@ -19,7 +20,7 @@ func NewServer(dbWorker, dbReader *gorm.DB, workerClient worker.WorkerClient) *S
 	r := gin.New()
 	baseRoute := r.Group("/api")
 	publicHandler := public.NewPublicHandler(&di)
-	publicHandler.RegisterRoutes(baseRoute)
+	publicHandler.RegisterRoutes(baseRoute, rest.CacheMiddleware)
 
 	return &Server{engine: r}
 }
