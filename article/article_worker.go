@@ -14,12 +14,12 @@ const (
 )
 
 type WorkerArticle struct {
-	writerDB *gorm.DB
+	workerDB *gorm.DB
 	readerDB *gorm.DB
 }
 
-func NewWorkerArticle(writerDB, readerDB *gorm.DB) *WorkerArticle {
-	return &WorkerArticle{writerDB, readerDB}
+func NewWorkerArticle(workerDB, readerDB *gorm.DB) *WorkerArticle {
+	return &WorkerArticle{workerDB, readerDB}
 }
 
 func (w *WorkerArticle) WorkerArticlePost() asynq.HandlerFunc {
@@ -28,7 +28,7 @@ func (w *WorkerArticle) WorkerArticlePost() asynq.HandlerFunc {
 		articleData := model.Article{}
 		json.Unmarshal(byt, &articleData)
 
-		if err := w.writerDB.Model(model.Article{}).
+		if err := w.workerDB.Model(model.Article{}).
 			Create(&articleData).Error; err != nil {
 			return err
 		}
