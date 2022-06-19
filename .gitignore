@@ -3,4 +3,5 @@ env.yml
 .DS_STORE
 **/debug.test
 .go-version
+.env
 

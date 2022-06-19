@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Article struct {
@@ -15,4 +17,11 @@ type Article struct {
 type ArticleFilter struct {
 	Query  string
 	Author string
+}
+
+func (a *Article) BeforeCreate(tx *gorm.DB) error {
+	if a.Created.IsZero() {
+		a.Created = time.Now()
+	}
+	return nil
 }

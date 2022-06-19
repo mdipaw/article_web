@@ -1,9 +1,30 @@
 package database
 
 import (
+	"fmt"
+	"os"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+)
+
+var DsnWriter = fmt.Sprintf(
+	"host=%s user=%s password=%s dbname=%s port=%s",
+	os.Getenv("DATABASE_WRITER_HOST"),
+	os.Getenv("DATABASE_WRITER_USER"),
+	os.Getenv("DATABASE_WRITER_PASSWORD"),
+	os.Getenv("DATABASE_WRITER_NAME"),
+	os.Getenv("DATABASE_WRITER_PORT"),
+)
+
+var DsnReader = fmt.Sprintf(
+	"host=%s user=%s password=%s dbname=%s port=%s",
+	os.Getenv("DATABASE_READER_HOST"),
+	os.Getenv("DATABASE_READER_USER"),
+	os.Getenv("DATABASE_READER_PASSWORD"),
+	os.Getenv("DATABASE_READER_NAME"),
+	os.Getenv("DATABASE_READER_PORT"),
 )
 
 func ConnectDatabaseWriter(dsn string, l logger.Interface) *gorm.DB {

@@ -5,7 +5,7 @@ CREATE TABLE articles (
     author TEXT,
     title TEXT,
     body TEXT,
-    created TIMESTAMPZ
+    created TIMESTAMPTZ
 )
 -- +goose StatementEnd
 
