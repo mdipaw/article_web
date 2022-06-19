@@ -25,3 +25,7 @@ func (a *Article) BeforeCreate(tx *gorm.DB) error {
 	}
 	return nil
 }
+
+func (Article) TableName() string {
+	return "articles"
+}

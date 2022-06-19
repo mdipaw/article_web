@@ -21,6 +21,7 @@ type testFunc func(f fixture)
 func runTest(testFunc testFunc) {
 	tests.NewDBTest(func(dbReader, dbWorker *gorm.DB) {
 		workerClient := worker.NewWorkerClient(redis.RedisAddress)
+		defer workerClient.Client.Close()
 		server := NewServer(dbWorker, dbReader, workerClient)
 
 		testFunc(fixture{

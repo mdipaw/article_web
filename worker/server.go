@@ -12,14 +12,14 @@ type WorkerServer struct {
 	router *asynq.ServeMux
 }
 
-func NewServer(redisAddr string, dbWriter, dbReader *gorm.DB) WorkerServer {
+func NewServer(redisAddr string, dbWorker, dbReader *gorm.DB) WorkerServer {
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{Addr: redisAddr},
 		asynq.Config{
 			Concurrency: 10,
 		},
 	)
-	articleWorker := article.NewWorkerArticle(dbWriter, dbReader)
+	articleWorker := article.NewWorkerArticle(dbWorker, dbReader)
 	router := asynq.NewServeMux()
 	router.HandleFunc(article.ArticlePost, articleWorker.WorkerArticlePost())
 

@@ -22,7 +22,8 @@ func NewPublicHandler(di *service.Container) *PublicHandler {
 
 func (p *PublicHandler) RegisterRoutes(engine *gin.RouterGroup, cacheMiddleWare rest.CacheMiddlewareFunc) *gin.RouterGroup {
 	engine.POST("/article", p.PostArticle())
-	engine.GET("/article", cacheMiddleWare(p.di.RedisClient), p.GetArticle())
+	engine.GET("/article", p.GetArticle())
+	// engine.GET("/article", cacheMiddleWare(p.di.RedisClient), p.GetArticle())
 	return engine
 }
 
