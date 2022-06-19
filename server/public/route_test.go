@@ -4,7 +4,9 @@ import (
 	"article_web/article"
 	"article_web/model"
 	"article_web/redis"
+	"article_web/rest"
 	"article_web/server"
+	"article_web/server/public"
 	"article_web/service"
 	"article_web/tests"
 	"article_web/worker"
@@ -90,5 +92,36 @@ func TestPostArticle(t *testing.T) {
 		isEqual := retrievedArticle.Created.Equal(params.Created)
 		assert.True(t, isEqual)
 
+	})
+}
+
+func TestGetArticle(t *testing.T) {
+	runTest(func(f fixture) {
+		var data = model.Article{
+			Author:  "test",
+			Body:    "test body",
+			Title:   "test Title",
+			Created: time.Now(),
+		}
+		f.di.ArticleReader.
+			GetQuery(model.ArticleFilter{}).Query.
+			Create(&data)
+
+		w := httptest.NewRecorder()
+		r, _ := http.NewRequest("GET", "/api/article", nil)
+		f.server.ServeHTTP(w, r)
+
+		assert.Equal(t, 200, w.Code)
+
+		var response rest.MappedResponse[[]public.ArticleResponse]
+		json.Unmarshal(w.Body.Bytes(), &response)
+
+		assert.Equal(t, 1, len(response.Data))
+		assert.Equal(t, 1, response.Page)
+		assert.Equal(t, data.Author, response.Data[0].Author)
+		assert.Equal(t, data.Title, response.Data[0].Title)
+		assert.Equal(t, data.Body, response.Data[0].Body)
+		isEqual := response.Data[0].Created.Equal(data.Created)
+		assert.True(t, isEqual)
 	})
 }

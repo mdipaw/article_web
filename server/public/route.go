@@ -3,6 +3,7 @@ package public
 import (
 	"article_web/article"
 	"article_web/model"
+	"article_web/rest"
 	"article_web/service"
 	"net/http"
 	"time"
@@ -48,8 +49,47 @@ func (p *PublicHandler) PostArticle() gin.HandlerFunc {
 	}
 }
 
-func (p *PublicHandler) GetArticle() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
+type ArticleResponse struct {
+	ID      int       `json:"id"`
+	Author  string    `json:"author"`
+	Title   string    `json:"title"`
+	Body    string    `json:"body"`
+	Created time.Time `json:"created"`
+}
 
+func (p *PublicHandler) GetArticle() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		paramQuery := c.Query("query")
+		paramAuthor := c.Query("author")
+
+		query := p.di.ArticleReader.GetQuery(model.ArticleFilter{
+			Query:  paramQuery,
+			Author: paramAuthor,
+		}).Query
+
+		paginator := rest.PaginatorFromContext[[]model.Article, []ArticleResponse](c)
+		paginatedResponse := paginator.PaginateQuery(query).
+			Map(func(x []model.Article) []ArticleResponse {
+				result := []ArticleResponse{}
+				for _, X := range x {
+					result = append(result, ArticleResponse{
+						ID:      X.ID,
+						Author:  X.Author,
+						Title:   X.Title,
+						Body:    X.Body,
+						Created: X.Created,
+					})
+				}
+				return result
+			})
+
+		if paginatedResponse.Error != nil {
+			c.JSON(http.StatusBadRequest,
+				gin.H{"error": paginatedResponse.Error.Error()})
+			return
+		}
+		// TODO:implement caching
+		c.JSON(http.StatusOK, paginatedResponse)
+		return
 	}
 }
