@@ -14,16 +14,16 @@ var doOnce sync.Once
 type testFunc func(*gorm.DB, *gorm.DB)
 
 func NewDBTest(testFunc testFunc) {
-	dbReader, dbWriter := setUpDB()
+	dbReader, dbWorker := setUpDB()
 	db1, _ := dbReader.DB()
-	db2, _ := dbWriter.DB()
+	db2, _ := dbWorker.DB()
 
-	defer dbWriter.Rollback()
+	defer dbWorker.Rollback()
 	defer dbReader.Rollback()
 	defer db1.Close()
 	defer db2.Close()
 
-	testFunc(dbReader, dbWriter)
+	testFunc(dbReader, dbWorker)
 
 }
 
