@@ -38,7 +38,7 @@ func TestGetArticle(t *testing.T) {
 		workers := article.NewWorkerArticle(f.dbWriter, f.dbReader)
 		workers.WorkerArticlePost()(context.Background(), task)
 
-		reader := article.NewArticle(f.dbReader)
+		reader := article.NewArticleReader(f.dbReader)
 		retrievedArticle, err := reader.GetQuery(model.ArticleFilter{
 			Author: data.Author,
 		}).First()

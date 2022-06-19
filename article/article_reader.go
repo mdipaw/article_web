@@ -7,12 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type Article struct {
+type ArticleReader struct {
 	dbReader *gorm.DB
 }
 
-func NewArticle(dbReader *gorm.DB) *Article {
-	return &Article{dbReader}
+func NewArticleReader(dbReader *gorm.DB) *ArticleReader {
+	return &ArticleReader{dbReader}
 }
 
 type superGetQuery = database.GetQuery[model.Article]
@@ -21,7 +21,7 @@ type thisGetQuery struct {
 	*superGetQuery
 }
 
-func (a *Article) GetQuery(filter model.ArticleFilter) thisGetQuery {
+func (a *ArticleReader) GetQuery(filter model.ArticleFilter) thisGetQuery {
 	return thisGetQuery{
 		database.NewQueryGeneric[model.Article, model.ArticleFilter]().
 			GetQuery(func(f model.ArticleFilter) *gorm.DB {
