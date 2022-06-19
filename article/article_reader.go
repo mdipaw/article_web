@@ -3,6 +3,7 @@ package article
 import (
 	"article_web/database"
 	"article_web/model"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -28,6 +29,9 @@ func (a *ArticleReader) GetQuery(filter model.ArticleFilter) thisGetQuery {
 				query := a.dbReader.Model(model.Article{})
 				if filter.Author != "" {
 					query = query.Where("author = ?", filter.Author)
+				}
+				if filter.Query != "" {
+					query = query.Where("body ILIKE ?", fmt.Sprintf("%%%v%%", filter.Query))
 				}
 				return query
 			}, filter)}

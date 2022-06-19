@@ -22,8 +22,7 @@ func NewPublicHandler(di *service.Container) *PublicHandler {
 
 func (p *PublicHandler) RegisterRoutes(engine *gin.RouterGroup, cacheMiddleWare rest.CacheMiddlewareFunc) *gin.RouterGroup {
 	engine.POST("/article", p.PostArticle())
-	engine.GET("/article", p.GetArticle())
-	// engine.GET("/article", cacheMiddleWare(p.di.RedisClient), p.GetArticle())
+	engine.GET("/article", cacheMiddleWare(p.di.RedisClient), p.GetArticle())
 	return engine
 }
 
@@ -46,6 +45,7 @@ func (p *PublicHandler) PostArticle() gin.HandlerFunc {
 			Body:    params.Body,
 			Created: params.Created,
 		}))
+		p.di.RedisClient.Delete("getAllArticle")
 		ctx.Status(200)
 		return
 	}
