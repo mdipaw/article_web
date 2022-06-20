@@ -31,7 +31,8 @@ func (a *ArticleReader) GetQuery(filter model.ArticleFilter) thisGetQuery {
 					query = query.Where("author = ?", filter.Author)
 				}
 				if filter.Query != "" {
-					query = query.Where("body ILIKE ?", fmt.Sprintf("%%%v%%", filter.Query))
+					arg := fmt.Sprintf("%%%v%%", filter.Query)
+					query = query.Where("titles ILIKE ? OR body ILIKE ?", arg, arg)
 				}
 				return query
 			}, filter)}
