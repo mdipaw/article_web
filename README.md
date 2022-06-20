@@ -75,5 +75,7 @@ docker-compose -f docker-compose-test.yml down
 ```shell
 cd $GOPATH/src/article_web
 docker-compose -f docker-compose.yml up
+with_env env.example go run bin/worker/main.go
+with_env env.example go run bin/web/main.go
 ```
 
